@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Topic 8 — Phonograph Quiz | Smart Life Course</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#0b0f1a;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:20px 16px 48px}
+.container{width:100%;max-width:700px}
+.screen{display:none}.screen.active{display:block}
+
+/* ── Registration ── */
+.reg-card{background:#1a1a2e;border-radius:16px;padding:36px 28px;text-align:center;border:1px solid #2d2d4e}
+.logo{font-size:28px;font-weight:700;color:#fff;margin-bottom:4px}
+.logo span{color:#9B2335}
+.topic-pill{display:inline-block;padding:4px 16px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:20px;background:#9B233522;color:#9B2335;border:1px solid #9B233555}
+.field-label{font-size:13px;color:#aaa;text-align:left;margin-bottom:6px;display:block}
+.field-input{width:100%;padding:13px 15px;border-radius:10px;border:2px solid #2d2d4e;background:#0d0d1f;color:#fff;font-size:16px;font-family:inherit;outline:none;transition:border-color .2s;margin-bottom:12px}
+.field-input:focus{border-color:#9B2335}
+.field-input::placeholder{color:#444}
+.start-btn{width:100%;margin-top:6px;padding:15px;background:#9B2335;border:none;border-radius:10px;font-size:16px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;opacity:1;transition:opacity .15s}
+.start-btn:hover{opacity:.85}.start-btn:disabled{opacity:.35;cursor:not-allowed}
+.reg-stats{margin-top:20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.reg-stat{background:#0d0d1f;border-radius:10px;padding:10px 6px;font-size:11px;color:#666;text-align:center}
+.reg-stat strong{display:block;font-size:18px;font-weight:700;color:#9B2335;margin-bottom:2px}
+.type-legend{margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.type-badge{font-size:11px;padding:3px 10px;border-radius:12px;font-weight:600}
+.tb-mcq{background:#1368ce22;color:#5b9fd4;border:1px solid #1368ce44}
+.tb-tf{background:#26890c22;color:#5db85d;border:1px solid #26890c44}
+.tb-dbg{background:#e21b3c22;color:#e27b8d;border:1px solid #e21b3c44}
+
+/* ── Quiz header ── */
+.quiz-top{background:#1a1a2e;border-radius:14px;padding:12px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;border:1px solid #2d2d4e}
+.player-label{font-size:10px;color:#9B2335;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.player-name{font-size:14px;color:#fff;font-weight:600}
+.prog-wrap{flex:1;margin:0 14px}
+.prog-label{font-size:11px;color:#666;margin-bottom:3px;text-align:center}
+.prog-bar{height:7px;background:#0d0d1f;border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;background:#9B2335;border-radius:4px;transition:width .4s}
+.score-box{text-align:right}
+.score-label{font-size:10px;color:#888}
+.score-val{font-size:20px;font-weight:700;color:#fff;display:block}
+
+/* ── Timer row ── */
+.timer-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.timer-circle{width:52px;height:52px;border-radius:50%;background:#1a1a2e;border:3px solid #9B2335;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#9B2335;transition:all .3s;flex-shrink:0}
+.timer-circle.urgent{border-color:#e94560;color:#e94560}
+.streak-msg{font-size:12px;color:#9B2335;flex:1;text-align:center;font-weight:600}
+
+/* ── Question card ── */
+.q-card{background:#1a1a2e;border-radius:14px;padding:18px 20px;margin-bottom:10px;border:1px solid #2d2d4e}
+.q-top-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.topic-badge{font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;background:#9B233522;color:#9B2335;border:1px solid #9B233544;text-transform:uppercase;letter-spacing:.06em}
+.q-type-badge{font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px}
+.qtb-mcq{background:#1368ce22;color:#5b9fd4;border:1px solid #1368ce44}
+.qtb-tf{background:#26890c22;color:#5db85d;border:1px solid #26890c44}
+.qtb-debug{background:#e21b3c22;color:#e27b8d;border:1px solid #e21b3c44}
+.q-num{font-size:11px;color:#555;margin-left:auto}
+.q-text{font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;margin-bottom:10px}
+
+/* ── Debug code block ── */
+.code-block{background:#0a0f1c;border:1px solid #1e3a5f;border-radius:10px;padding:14px 16px;margin:10px 0;font-family:'Courier New',monospace;font-size:13px;color:#7ec8e3;line-height:1.8;white-space:pre;overflow-x:auto;text-align:left}
+.code-label{font-size:10px;font-weight:700;color:#e94560;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.code-label::before{content:'🐛';font-size:12px}
+
+/* ── Answers ── */
+.answers-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.answers-grid.tf-grid{grid-template-columns:1fr 1fr;max-width:400px;margin:0 auto 10px}
+@media(max-width:480px){.answers-grid{grid-template-columns:1fr}}
+.ans-btn{padding:13px 14px;border-radius:10px;border:none;cursor:pointer;font-size:13px;font-weight:600;color:#fff;text-align:left;display:flex;align-items:center;gap:9px;transition:transform .1s,opacity .2s;line-height:1.4;font-family:inherit;width:100%}
+.ans-btn:hover{transform:scale(1.02)}.ans-btn:active{transform:scale(0.98)}
+.ans-btn.a{background:#e21b3c}.ans-btn.b{background:#1368ce}
+.ans-btn.c{background:#d89e00}.ans-btn.d{background:#26890c}
+.ans-btn.correct{outline:4px solid #fff;opacity:1!important}
+.ans-btn.wrong{opacity:.25}.ans-btn.locked{cursor:default;pointer-events:none}
+.ans-icon{width:28px;height:28px;border-radius:5px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+
+/* ── True/False special styling ── */
+.tf-true{background:#26890c!important;font-size:15px;justify-content:center;font-weight:700}
+.tf-false{background:#e21b3c!important;font-size:15px;justify-content:center;font-weight:700}
+
+/* ── Feedback ── */
+.feedback-box{text-align:center;padding:10px 14px;border-radius:10px;margin-bottom:8px;font-size:13px;font-weight:600;display:none}
+.feedback-box.ok{background:#1a3d1a;color:#46d39a;border:1px solid #46d39a;display:block}
+.feedback-box.no{background:#3d1a1a;color:#ff6b6b;border:1px solid #e94560;display:block}
+.exp-box{font-size:12px;color:#777;text-align:center;margin-bottom:8px;min-height:16px;line-height:1.6;padding:0 4px}
+.next-btn{width:100%;padding:13px;background:#9B2335;border:none;border-radius:10px;font-size:14px;font-weight:700;color:#fff;cursor:pointer;display:none;font-family:inherit;transition:opacity .15s}
+.next-btn:hover{opacity:.85}
+
+/* ── Submitting ── */
+.sub-wrap{padding:60px 0;text-align:center}
+.spinner{width:50px;height:50px;border:4px solid #2d2d4e;border-top-color:#9B2335;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sub-title{font-size:20px;font-weight:600;color:#fff;margin-bottom:6px}
+.sub-sub{font-size:14px;color:#777}
+.sub-err{font-size:13px;color:#e94560;margin-top:14px;display:none;line-height:1.6}
+
+/* ── Done ── */
+.done-card{background:#1a1a2e;border-radius:16px;padding:32px 24px;text-align:center;border:1px solid #2d2d4e}
+.done-trophy{font-size:50px;margin-bottom:10px}
+.done-name{font-size:22px;font-weight:700;color:#fff;margin-bottom:4px}
+.done-sent{font-size:13px;color:#9B2335;margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:6px}
+.done-score{font-size:56px;font-weight:800;color:#9B2335;line-height:1}
+.done-pts{font-size:12px;color:#555;margin-bottom:6px}
+.done-correct{font-size:15px;color:#ccc;margin-bottom:20px}
+.done-grade{font-size:14px;font-weight:600;padding:9px 20px;border-radius:10px;display:inline-block;margin-bottom:20px}
+.done-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px}
+.done-stat{background:#0d0d1f;border-radius:10px;padding:12px 6px;text-align:center}
+.done-stat-val{font-size:20px;font-weight:700;color:#9B2335;display:block}
+.done-stat-lbl{font-size:11px;color:#666;margin-top:2px}
+.done-breakdown{margin-bottom:16px;text-align:left}
+.done-bd-title{font-size:12px;color:#666;margin-bottom:8px;text-align:center;text-transform:uppercase;letter-spacing:.06em}
+.done-bd-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #2d2d4e;font-size:12px}
+.done-bd-row span:first-child{color:#888}
+.done-bd-row span:last-child{color:#fff;font-weight:600}
+.done-notice{font-size:12px;color:#555;padding:12px;background:#0d0d1f;border-radius:10px;border:1px solid #2d2d4e;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- REGISTRATION -->
+<div id="regScreen" class="screen active">
+  <div class="reg-card">
+    <div class="logo">Smart<span>Life</span> Quiz</div>
+    <div class="topic-pill">Topic 8 &mdash; Phonograph</div>
+    <label class="field-label" for="nameIn">Your full name</label>
+    <input class="field-input" id="nameIn" type="text" placeholder="e.g. Ahmed Al Rashid" maxlength="40" oninput="chk()" onkeydown="if(event.key==='Enter')document.getElementById('classIn').focus()">
+    <label class="field-label" for="classIn">Your class / grade</label>
+    <input class="field-input" id="classIn" type="text" placeholder="e.g. Grade 5A" maxlength="30" oninput="chk()" onkeydown="if(event.key==='Enter')go()">
+    <button class="start-btn" id="startBtn" onclick="go()" disabled>Start Quiz &rarr;</button>
+    <div class="reg-stats">
+      <div class="reg-stat"><strong>20</strong>Questions</div>
+      <div class="reg-stat"><strong>20s</strong>Per question</div>
+      <div class="reg-stat"><strong>1000</strong>Max pts each</div>
+    </div>
+    <div class="type-legend">
+      <span class="type-badge tb-mcq">&#9654; Multiple Choice</span>
+      <span class="type-badge tb-tf">&#10003; True / False</span>
+      <span class="type-badge tb-dbg">&#128027; Debug the Code</span>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="quizScreen" class="screen">
+  <div class="quiz-top">
+    <div><div class="player-label">Playing as</div><div class="player-name" id="pNameDisplay">&mdash;</div></div>
+    <div class="prog-wrap"><div class="prog-label" id="progLabel">1 / 20</div><div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div></div>
+    <div class="score-box"><div class="score-label">Score</div><span class="score-val" id="scoreVal">0</span></div>
+  </div>
+  <div class="timer-row">
+    <div class="timer-circle" id="timerEl">20</div>
+    <div class="streak-msg" id="streakEl"></div>
+    <div style="width:52px"></div>
+  </div>
+  <div class="q-card">
+    <div class="q-top-row">
+      <div class="topic-badge" id="badgeEl">Topic 8</div>
+      <div class="q-type-badge" id="typeBadgeEl"></div>
+      <div class="q-num" id="qNumEl">Q1</div>
+    </div>
+    <div class="q-text" id="qTextEl">Loading&hellip;</div>
+    <div id="codeBlockWrap" style="display:none">
+      <div class="code-label">Debug this code</div>
+      <div class="code-block" id="codeBlockEl"></div>
+    </div>
+  </div>
+  <div class="answers-grid" id="ansGrid"></div>
+  <div class="feedback-box" id="fbEl"></div>
+  <div class="exp-box" id="expEl"></div>
+  <button class="next-btn" id="nextBtn" onclick="nextQ()">Next &rarr;</button>
+</div>
+
+<!-- SUBMITTING -->
+<div id="subScreen" class="screen">
+  <div class="sub-wrap">
+    <div class="spinner"></div>
+    <div class="sub-title">Submitting your results&hellip;</div>
+    <div class="sub-sub">Sending to your teacher &mdash; please wait</div>
+    <div class="sub-err" id="subErr"></div>
+  </div>
+</div>
+
+<!-- DONE -->
+<div id="doneScreen" class="screen">
+  <div class="done-card">
+    <div class="done-trophy">&#127881;</div>
+    <div class="done-name" id="doneName">Well done!</div>
+    <div class="done-sent"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Results sent to your teacher</div>
+    <div class="done-score" id="doneScore">0</div>
+    <div class="done-pts">total points</div>
+    <div class="done-correct" id="doneCorrect">0 of 20 correct</div>
+    <div class="done-grade" id="doneGrade"></div>
+    <div class="done-stats">
+      <div class="done-stat"><span class="done-stat-val" id="dsPct">0%</span><div class="done-stat-lbl">Accuracy</div></div>
+      <div class="done-stat"><span class="done-stat-val" id="dsStreak">0</span><div class="done-stat-lbl">Best streak</div></div>
+      <div class="done-stat"><span class="done-stat-val" id="dsTime">0s</span><div class="done-stat-lbl">Avg time</div></div>
+    </div>
+    <div class="done-breakdown">
+      <div class="done-bd-title">Score by question type</div>
+      <div class="done-bd-row"><span>Multiple Choice</span><span id="bdMCQ">—</span></div>
+      <div class="done-bd-row"><span>True / False</span><span id="bdTF">—</span></div>
+      <div class="done-bd-row"><span>Debug the Code</span><span id="bdDBG">—</span></div>
+    </div>
+    <div class="done-notice">Results submitted to your teacher&apos;s spreadsheet.<br>Nothing to download or edit. Great work completing the quiz!</div>
+  </div>
+</div>
+
+</div><!-- /container -->
+<script>
+const SHEET_URL="https://script.google.com/macros/s/AKfycbwMrmxCC7MS4GZ_1G_3-6x2MIENPJY0lnAixMwmHmpFCVvFmcokDDUpAmlacRxg-77iiw/exec";
+const QUIZ_TOPIC="Topic 8 \u2014 Phonograph";
+const ICONS=['\u25cf','\u25a0','\u25b2','\u25c6'],COLS=['a','b','c','d'];
+const ALL_Q=[{"type": "mcq", "q": "Who invented the phonograph in 1877?", "ans": ["Emile Berliner", "Alexander Bell", "Thomas Edison", "Nikola Tesla"], "c": 2, "exp": "Thomas Edison invented the phonograph in 1877 by wrapping tin foil around a metal cylinder and recording sound via a vibrating needle."}, {"type": "tf", "q": "Emile Berliner invented the disc record in 1888.", "ans": ["True", "False"], "c": 0, "exp": "TRUE. In 1888, Emile Berliner invented the flat disc record, which gradually replaced Edison's cylinder format."}, {"type": "mcq", "q": "Which code block is used to write and play musical notes in uKit EDU?", "ans": ["Play sound effect block", "Play motion block", "Play Tone block", "Record block"], "c": 2, "exp": "The 'Play Tone' block in the display code class lets you set a specific musical note and beat duration."}, {"type": "debug", "q": "The phonograph plays music but the turntable never rotates. Find the missing block:", "code": "REPEAT forever\n  PLAY Tone C4, 1 beat\n  PLAY Tone D4, 1 beat\n  PLAY Tone E4, 1 beat", "ans": ["Add 'ROTATE servo ID-1, 360° FORWARD' alongside the music blocks", "Add a WAIT block", "Change REPEAT to IF", "Add a sound effect block"], "c": 0, "exp": "The turntable servo rotation is missing entirely. The 'Rotate servo 360°' block must run alongside the music to spin the turntable."}, {"type": "tf", "q": "C5 to C6 represents one octave of musical notes.", "ans": ["True", "False"], "c": 0, "exp": "TRUE. One octave spans from C5 to C6 — the same 7 notes (C D E F G A B) at a higher pitch."}, {"type": "mcq", "q": "How many standard musical notes does the Play Tone block support?", "ans": ["5 notes", "7 notes (C D E F G A B)", "10 notes", "12 notes including sharps"], "c": 1, "exp": "The Play Tone block supports the 7 standard solfège notes: C, D, E, F, G, A, B — across different octaves."}, {"type": "debug", "q": "The song plays correctly once then stops. It should loop. What is missing?", "code": "PLAY Tone C4, 1 beat\nPLAY Tone E4, 1 beat\nPLAY Tone G4, 2 beats", "ans": ["Wrap all the PLAY Tone blocks inside a 'REPEAT forever' block", "Add a WAIT block after the last note", "Add a second song after the first", "Change 2 beats to 1 beat"], "c": 0, "exp": "Without REPEAT forever, the song plays once and the program ends. Wrapping in REPEAT makes it loop continuously."}, {"type": "mcq", "q": "Which code block switches a servo into 'wheel mode' for continuous rotation?", "ans": ["Set servo angle block", "Play motion block", "Rotate servo ID, 360° block", "Stop motor block"], "c": 2, "exp": "The 'Rotate servo ID (), 360°' block switches the servo to wheel mode — enabling it to spin continuously like a wheel rather than holding a fixed angle."}, {"type": "tf", "q": "The beat setting in the Play Tone block controls the pitch (how high or low the note sounds).", "ans": ["True", "False"], "c": 1, "exp": "FALSE. Beat controls DURATION (how long the note lasts). The tone letter (C, D, E…) and number (C4, C5) control the pitch."}, {"type": "mcq", "q": "When was the first long-playing (LP) record launched?", "ans": ["1877", "1888", "1920", "1948"], "c": 3, "exp": "In 1948, Columbia Records launched the first LP record — with superior sound quality and much longer playing time than previous formats."}, {"type": "debug", "q": "All notes sound the same length even though some should be longer. Find the bug:", "code": "REPEAT forever\n  PLAY Tone C4, 1 beat\n  PLAY Tone E4, 1 beat\n  PLAY Tone G4, 1 beat\n  PLAY Tone C5, 1 beat", "ans": ["The final note C5 should be 2 beats (half note) according to the music score, not 1 beat", "Change C4 to D4", "Remove REPEAT", "Change 1 beat to 0.5 beats for all"], "c": 0, "exp": "If the music score shows the last note as a half note (2 beats), its Play Tone block must say 2 beats — not 1."}, {"type": "tf", "q": "A speaker converts electrical audio signals into sound waves.", "ans": ["True", "False"], "c": 0, "exp": "TRUE. A speaker receives electrical signals and vibrates its cone to produce sound waves we can hear."}, {"type": "mcq", "q": "What are the three main structural parts of the phonograph model?", "ans": ["Fan, sensor, and LED", "Turntable, tone arm, and loudspeaker on a controller base", "Servo, motor, and camera", "Screen, keyboard, and speaker"], "c": 1, "exp": "The phonograph model consists of a turntable (spinning disc), a tone arm (stylus holder), and a loudspeaker — all mounted on the controller base."}, {"type": "debug", "q": "The turntable spins in the wrong direction. What needs to change?", "code": "ROTATE servo ID-1, 360° FORWARD speed 60", "ans": ["Change FORWARD to BACKWARD", "Change 360° to 180°", "Change speed from 60 to 6", "Remove the block"], "c": 0, "exp": "The rotation direction is set to FORWARD. Changing it to BACKWARD reverses the turntable spin direction."}, {"type": "mcq", "q": "What does 'repeat forever' do in the phonograph music program?", "ans": ["Plays the song exactly twice", "Plays each note for twice as long", "Makes the song loop continuously", "Speeds up the tempo"], "c": 2, "exp": "'Repeat forever' wraps all the Play Tone blocks so the song plays in an endless loop — just like a vinyl record plays the same track repeatedly."}, {"type": "tf", "q": "The phonograph topic requires programming BOTH music playback AND turntable rotation.", "ans": ["True", "False"], "c": 0, "exp": "TRUE. Task 1 programs the music using Play Tone blocks. Task 2 adds the turntable rotation using the Rotate 360° servo block."}, {"type": "mcq", "q": "What does one 'beat' represent in the Play Tone block?", "ans": ["One second exactly", "One musical time unit (the duration of the note)", "One octave", "One rotation of the turntable"], "c": 1, "exp": "A beat is a musical time unit — a full beat is longer than a half beat. It controls how long each note sounds."}, {"type": "debug", "q": "The music plays but is very slow. The student wants it faster. What needs to change?", "code": "REPEAT forever\n  PLAY Tone C4, 4 beats\n  PLAY Tone E4, 4 beats\n  PLAY Tone G4, 4 beats", "ans": ["Change 4 beats to 1 beat (or 0.5 beats) for a faster tempo", "Change C4 to C5", "Add WAIT blocks between notes", "Remove REPEAT"], "c": 0, "exp": "Fewer beats per note = faster tempo. Changing from 4 beats (very long) to 1 beat (quarter note) makes the song play much faster."}, {"type": "tf", "q": "The first phonograph used a flat disc record to record and play sound.", "ans": ["True", "False"], "c": 1, "exp": "FALSE. Edison's 1877 phonograph used a CYLINDER wrapped in tin foil — not a flat disc. The disc record was Berliner's later 1888 invention."}, {"type": "mcq", "q": "What was significant about the LP record launched in 1948?", "ans": ["It was the first to use electricity", "It could only play classical music", "Its superior sound quality and extended playtime", "It was invented by Thomas Edison"], "c": 2, "exp": "The LP record offered significantly better sound quality and much longer playback time — marking a major advance in music technology."}];
+
+let pName='',pClass='',questions=[],cur=0,score=0;
+let streak=0,bestStreak=0,answered=false;
+let timer=20,timerInt=null;
+let results=[],timeTaken=[],qStart=0;
+let typeTally={mcq:{c:0,t:0},tf:{c:0,t:0},debug:{c:0,t:0}};
+
+function $(i){return document.getElementById(i)}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active')}
+function shuffle(a){return[...a].sort(()=>Math.random()-.5)}
+
+function chk(){
+  const n=$('nameIn').value.trim(),c=$('classIn').value.trim();
+  $('startBtn').disabled=n.length<2||c.length<1;
+}
+function go(){
+  pName=$('nameIn').value.trim();pClass=$('classIn').value.trim();
+  if(pName.length<2||pClass.length<1)return;
+  $('pNameDisplay').textContent=pName;
+  questions=shuffle(ALL_Q);cur=0;score=0;streak=0;bestStreak=0;
+  results=[];timeTaken=[];typeTally={mcq:{c:0,t:0},tf:{c:0,t:0},debug:{c:0,t:0}};
+  show('quizScreen');renderQ();
+}
+
+function renderQ(){
+  answered=false;
+  const q=questions[cur];
+  $('progFill').style.width=Math.round(cur/questions.length*100)+'%';
+  $('progLabel').textContent=(cur+1)+' / '+questions.length;
+  $('qNumEl').textContent='Q'+(cur+1)+' of '+questions.length;
+  $('qTextEl').textContent=q.q;
+  $('fbEl').className='feedback-box';$('expEl').textContent='';
+  $('nextBtn').style.display='none';
+  $('streakEl').textContent=streak>=2?streak+' in a row! \uD83D\uDD25':'';
+
+  // Type badge
+  const tb=$('typeBadgeEl');
+  if(q.type==='mcq'){tb.textContent='\u25B6 Multiple Choice';tb.className='q-type-badge qtb-mcq';}
+  else if(q.type==='tf'){tb.textContent='\u2713 True / False';tb.className='q-type-badge qtb-tf';}
+  else{tb.textContent='\uD83D\uDC1B Debug the Code';tb.className='q-type-badge qtb-debug';}
+
+  // Code block for debug questions
+  const cw=$('codeBlockWrap');
+  if(q.type==='debug' && q.code){
+    $('codeBlockEl').textContent=q.code;
+    cw.style.display='block';
+  }else{cw.style.display='none';}
+
+  // Build answer buttons
+  const grid=$('ansGrid');grid.innerHTML='';
+  if(q.type==='tf'){
+    grid.className='answers-grid tf-grid';
+    const pairs=[[0,'tf-true','\u2714  True'],[1,'tf-false','\u2718  False']];
+    pairs.forEach(([orig,cls,label])=>{
+      const btn=document.createElement('button');
+      btn.className='ans-btn '+cls;
+      btn.innerHTML=label;
+      btn.dataset.orig=orig;
+      btn.onclick=()=>pick(btn,orig===q.c,q);
+      grid.appendChild(btn);
+    });
+  }else{
+    grid.className='answers-grid';
+    const idxs=shuffle([0,1,2,3]);
+    idxs.forEach((orig,pos)=>{
+      const btn=document.createElement('button');
+      btn.className='ans-btn '+COLS[pos];
+      btn.innerHTML='<span class="ans-icon">'+ICONS[pos]+'</span>'+q.ans[orig];
+      btn.dataset.orig=orig;
+      btn.onclick=()=>pick(btn,orig===q.c,q);
+      grid.appendChild(btn);
+    });
+  }
+  qStart=Date.now();startTimer();
+}
+
+function startTimer(){
+  clearInterval(timerInt);timer=20;updTimer();
+  timerInt=setInterval(()=>{timer--;updTimer();if(timer<=0){clearInterval(timerInt);timeUp();}},1000);
+}
+function updTimer(){
+  $('timerEl').textContent=timer;
+  $('timerEl').className='timer-circle'+(timer<=5?' urgent':'');
+}
+function timeUp(){
+  if(answered)return;answered=true;streak=0;
+  revealAll(null);
+  $('fbEl').textContent="Time's up!";$('fbEl').className='feedback-box no';
+  $('expEl').textContent=questions[cur].exp;$('nextBtn').style.display='block';
+  const q=questions[cur];const tk=q.type==='debug'?'debug':q.type;
+  typeTally[tk].t++;
+  results.push({type:q.type,ok:false,pts:0,t:20});
+}
+function pick(btn,isOk,q){
+  if(answered)return;answered=true;clearInterval(timerInt);
+  const el=Math.round((Date.now()-qStart)/1000);timeTaken.push(el);
+  const pts=isOk?Math.max(500,timer*50):0;
+  if(isOk){score+=pts;streak++;bestStreak=Math.max(bestStreak,streak);}else streak=0;
+  $('scoreVal').textContent=score.toLocaleString();
+  const tk=q.type==='debug'?'debug':q.type;
+  typeTally[tk].t++;if(isOk)typeTally[tk].c++;
+  revealAll(btn);
+  $('fbEl').textContent=isOk?(streak>=3?'Correct! +'+pts.toLocaleString()+' \u2014 '+streak+' streak! \uD83D\uDD25':'Correct! +'+pts.toLocaleString()+' pts'):'Not quite!';
+  $('fbEl').className='feedback-box '+(isOk?'ok':'no');
+  $('expEl').textContent=q.exp;
+  $('streakEl').textContent=streak>=2?streak+' in a row! \uD83D\uDD25':'';
+  $('nextBtn').style.display='block';
+  results.push({type:q.type,ok:isOk,pts:pts,t:el});
+}
+function revealAll(sel){
+  const q=questions[cur];
+  if(q.type==='tf'){
+    document.querySelectorAll('.ans-btn').forEach(b=>{
+      b.style.pointerEvents='none';
+      const orig=parseInt(b.dataset.orig);
+      if(orig===q.c){b.style.outline='4px solid #fff';}
+      else if(b===sel||sel===null){b.style.opacity='.25';}
+      else{b.style.opacity='.25';}
+    });
+  }else{
+    document.querySelectorAll('.ans-btn').forEach(b=>{
+      b.classList.add('locked');
+      b.classList.add(parseInt(b.dataset.orig)===q.c?'correct':'wrong');
+    });
+  }
+}
+function nextQ(){cur++;if(cur>=questions.length)submitResults();else renderQ();}
+
+async function submitResults(){
+  show('subScreen');
+  const correct=results.filter(r=>r.ok).length;
+  const pct=Math.round(correct/questions.length*100);
+  const avgTime=timeTaken.length?Math.round(timeTaken.reduce((a,b)=>a+b,0)/timeTaken.length):0;
+  const grade=pct>=90?'Excellent':pct>=70?'Great':pct>=50?'Good':'Needs Practice';
+  const now=new Date();
+  const qLog=results.map((r,i)=>'Q'+(i+1)+'['+r.type+']['+(r.ok?'Y':'N')+']'+r.pts+'pts').join('|');
+  const bdStr=
+    'MCQ:'+typeTally.mcq.c+'/'+typeTally.mcq.t+' '+
+    'TF:'+typeTally.tf.c+'/'+typeTally.tf.t+' '+
+    'Debug:'+typeTally.debug.c+'/'+typeTally.debug.t;
+  const payload={
+    studentName:pName,className:pClass,quizTopic:QUIZ_TOPIC,
+    date:now.toLocaleDateString('en-GB'),
+    time:now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
+    totalScore:score,correct:correct,totalQuestions:questions.length,
+    accuracy:pct,grade:grade,bestStreak:bestStreak,avgTimeSec:avgTime,
+    topicBreakdown:bdStr,questionLog:qLog,
+  };
+  try{
+    await fetch(SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  }catch(err){
+    $('subErr').innerHTML='Could not submit. Please tell your teacher.<br><small>'+err.message+'</small>';
+    $('subErr').style.display='block';
+  }
+  showDone(correct,pct,avgTime,grade);
+}
+function showDone(correct,pct,avgTime,grade){
+  show('doneScreen');
+  $('doneName').textContent='Well done, '+pName+'!';
+  $('doneScore').textContent=score.toLocaleString();
+  $('doneCorrect').textContent=correct+' of '+questions.length+' correct';
+  $('dsPct').textContent=pct+'%';$('dsStreak').textContent=bestStreak;$('dsTime').textContent=avgTime+'s';
+  const m={Excellent:['#1a3d1a','#46d39a','Excellent \u2014 Master Coder! \uD83C\uDFC6'],
+             Great:['#1a2e3d','#5bc0eb','Great work! Keep it up! \uD83D\uDC4F'],
+             Good:['#3d3d1a','#d89e00','Good effort \u2014 review and retry! \uD83D\uDCDA'],
+             'Needs Practice':['#3d1a1a','#ff6b6b','Keep practising \u2014 you\u2019ve got this! \uD83D\uDCAA']};
+  const[bg,col,lbl]=m[grade]||m['Needs Practice'];
+  const g=$('doneGrade');g.style.cssText='background:'+bg+';color:'+col+';padding:9px 20px;border-radius:10px';g.textContent=lbl;
+  $('bdMCQ').textContent=typeTally.mcq.c+'/'+typeTally.mcq.t;
+  $('bdTF').textContent=typeTally.tf.c+'/'+typeTally.tf.t;
+  $('bdDBG').textContent=typeTally.debug.c+'/'+typeTally.debug.t;
+}
+</script>
+</body>
+</html>
