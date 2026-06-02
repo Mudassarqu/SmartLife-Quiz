@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>uKit Quiz — UKIT Components Quiz | Smart Life Course</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#0b0f1a;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:20px 16px 48px}
+.container{width:100%;max-width:700px}
+.screen{display:none}.screen.active{display:block}
+
+/* ── Registration ── */
+.reg-card{background:#1a1a2e;border-radius:16px;padding:36px 28px;text-align:center;border:1px solid #2d2d4e}
+.logo{font-size:28px;font-weight:700;color:#fff;margin-bottom:4px}
+.logo span{color:#0077CC}
+.topic-pill{display:inline-block;padding:4px 16px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:20px;background:#0077CC22;color:#0077CC;border:1px solid #0077CC55}
+.field-label{font-size:13px;color:#aaa;text-align:left;margin-bottom:6px;display:block}
+.field-input{width:100%;padding:13px 15px;border-radius:10px;border:2px solid #2d2d4e;background:#0d0d1f;color:#fff;font-size:16px;font-family:inherit;outline:none;transition:border-color .2s;margin-bottom:12px}
+.field-input:focus{border-color:#0077CC}
+.field-input::placeholder{color:#444}
+.start-btn{width:100%;margin-top:6px;padding:15px;background:#0077CC;border:none;border-radius:10px;font-size:16px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;opacity:1;transition:opacity .15s}
+.start-btn:hover{opacity:.85}.start-btn:disabled{opacity:.35;cursor:not-allowed}
+.reg-stats{margin-top:20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.reg-stat{background:#0d0d1f;border-radius:10px;padding:10px 6px;font-size:11px;color:#666;text-align:center}
+.reg-stat strong{display:block;font-size:18px;font-weight:700;color:#0077CC;margin-bottom:2px}
+.type-legend{margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.type-badge{font-size:11px;padding:3px 10px;border-radius:12px;font-weight:600}
+.tb-mcq{background:#1368ce22;color:#5b9fd4;border:1px solid #1368ce44}
+.tb-tf{background:#26890c22;color:#5db85d;border:1px solid #26890c44}
+.tb-dbg{background:#e21b3c22;color:#e27b8d;border:1px solid #e21b3c44}
+
+/* ── Quiz header ── */
+.quiz-top{background:#1a1a2e;border-radius:14px;padding:12px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;border:1px solid #2d2d4e}
+.player-label{font-size:10px;color:#0077CC;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.player-name{font-size:14px;color:#fff;font-weight:600}
+.prog-wrap{flex:1;margin:0 14px}
+.prog-label{font-size:11px;color:#666;margin-bottom:3px;text-align:center}
+.prog-bar{height:7px;background:#0d0d1f;border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;background:#0077CC;border-radius:4px;transition:width .4s}
+.score-box{text-align:right}
+.score-label{font-size:10px;color:#888}
+.score-val{font-size:20px;font-weight:700;color:#fff;display:block}
+
+/* ── Timer row ── */
+.timer-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.timer-circle{width:52px;height:52px;border-radius:50%;background:#1a1a2e;border:3px solid #0077CC;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#0077CC;transition:all .3s;flex-shrink:0}
+.timer-circle.urgent{border-color:#e94560;color:#e94560}
+.streak-msg{font-size:12px;color:#0077CC;flex:1;text-align:center;font-weight:600}
+
+/* ── Question card ── */
+.q-card{background:#1a1a2e;border-radius:14px;padding:18px 20px;margin-bottom:10px;border:1px solid #2d2d4e}
+.q-top-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.topic-badge{font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;background:#0077CC22;color:#0077CC;border:1px solid #0077CC44;text-transform:uppercase;letter-spacing:.06em}
+.q-type-badge{font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px}
+.qtb-mcq{background:#1368ce22;color:#5b9fd4;border:1px solid #1368ce44}
+.qtb-tf{background:#26890c22;color:#5db85d;border:1px solid #26890c44}
+.qtb-debug{background:#e21b3c22;color:#e27b8d;border:1px solid #e21b3c44}
+.q-num{font-size:11px;color:#555;margin-left:auto}
+.q-text{font-size:16px;font-weight:600;color:#fff;line-height:1.5;text-align:center;margin-bottom:10px}
+
+/* ── Debug code block ── */
+.code-block{background:#0a0f1c;border:1px solid #1e3a5f;border-radius:10px;padding:14px 16px;margin:10px 0;font-family:'Courier New',monospace;font-size:13px;color:#7ec8e3;line-height:1.8;white-space:pre;overflow-x:auto;text-align:left}
+.code-label{font-size:10px;font-weight:700;color:#e94560;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.code-label::before{content:'🐛';font-size:12px}
+
+/* ── Answers ── */
+.answers-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.answers-grid.tf-grid{grid-template-columns:1fr 1fr;max-width:400px;margin:0 auto 10px}
+@media(max-width:480px){.answers-grid{grid-template-columns:1fr}}
+.ans-btn{padding:13px 14px;border-radius:10px;border:none;cursor:pointer;font-size:13px;font-weight:600;color:#fff;text-align:left;display:flex;align-items:center;gap:9px;transition:transform .1s,opacity .2s;line-height:1.4;font-family:inherit;width:100%}
+.ans-btn:hover{transform:scale(1.02)}.ans-btn:active{transform:scale(0.98)}
+.ans-btn.a{background:#e21b3c}.ans-btn.b{background:#1368ce}
+.ans-btn.c{background:#d89e00}.ans-btn.d{background:#26890c}
+.ans-btn.correct{outline:4px solid #fff;opacity:1!important}
+.ans-btn.wrong{opacity:.25}.ans-btn.locked{cursor:default;pointer-events:none}
+.ans-icon{width:28px;height:28px;border-radius:5px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+
+/* ── True/False special styling ── */
+.tf-true{background:#26890c!important;font-size:15px;justify-content:center;font-weight:700}
+.tf-false{background:#e21b3c!important;font-size:15px;justify-content:center;font-weight:700}
+
+/* ── Feedback ── */
+.feedback-box{text-align:center;padding:10px 14px;border-radius:10px;margin-bottom:8px;font-size:13px;font-weight:600;display:none}
+.feedback-box.ok{background:#1a3d1a;color:#46d39a;border:1px solid #46d39a;display:block}
+.feedback-box.no{background:#3d1a1a;color:#ff6b6b;border:1px solid #e94560;display:block}
+.exp-box{font-size:12px;color:#777;text-align:center;margin-bottom:8px;min-height:16px;line-height:1.6;padding:0 4px}
+.next-btn{width:100%;padding:13px;background:#0077CC;border:none;border-radius:10px;font-size:14px;font-weight:700;color:#fff;cursor:pointer;display:none;font-family:inherit;transition:opacity .15s}
+.next-btn:hover{opacity:.85}
+
+/* ── Submitting ── */
+.sub-wrap{padding:60px 0;text-align:center}
+.spinner{width:50px;height:50px;border:4px solid #2d2d4e;border-top-color:#0077CC;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sub-title{font-size:20px;font-weight:600;color:#fff;margin-bottom:6px}
+.sub-sub{font-size:14px;color:#777}
+.sub-err{font-size:13px;color:#e94560;margin-top:14px;display:none;line-height:1.6}
+
+/* ── Done ── */
+.done-card{background:#1a1a2e;border-radius:16px;padding:32px 24px;text-align:center;border:1px solid #2d2d4e}
+.done-trophy{font-size:50px;margin-bottom:10px}
+.done-name{font-size:22px;font-weight:700;color:#fff;margin-bottom:4px}
+.done-sent{font-size:13px;color:#0077CC;margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:6px}
+.done-score{font-size:56px;font-weight:800;color:#0077CC;line-height:1}
+.done-pts{font-size:12px;color:#555;margin-bottom:6px}
+.done-correct{font-size:15px;color:#ccc;margin-bottom:20px}
+.done-grade{font-size:14px;font-weight:600;padding:9px 20px;border-radius:10px;display:inline-block;margin-bottom:20px}
+.done-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px}
+.done-stat{background:#0d0d1f;border-radius:10px;padding:12px 6px;text-align:center}
+.done-stat-val{font-size:20px;font-weight:700;color:#0077CC;display:block}
+.done-stat-lbl{font-size:11px;color:#666;margin-top:2px}
+.done-breakdown{margin-bottom:16px;text-align:left}
+.done-bd-title{font-size:12px;color:#666;margin-bottom:8px;text-align:center;text-transform:uppercase;letter-spacing:.06em}
+.done-bd-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #2d2d4e;font-size:12px}
+.done-bd-row span:first-child{color:#888}
+.done-bd-row span:last-child{color:#fff;font-weight:600}
+.done-notice{font-size:12px;color:#555;padding:12px;background:#0d0d1f;border-radius:10px;border:1px solid #2d2d4e;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- REGISTRATION -->
+<div id="regScreen" class="screen active">
+  <div class="reg-card">
+    <div class="logo"><span>uKit</span> Quiz</div>
+    <div class="topic-pill">uKit Quiz &mdash; UKIT Components</div>
+    <label class="field-label" for="nameIn">Your full name</label>
+    <input class="field-input" id="nameIn" type="text" placeholder="e.g. Ahmed Al Rashid" maxlength="40" oninput="chk()" onkeydown="if(event.key==='Enter')document.getElementById('classIn').focus()">
+    <label class="field-label" for="classIn">Your class / grade</label>
+    <input class="field-input" id="classIn" type="text" placeholder="e.g. Grade 5A" maxlength="30" oninput="chk()" onkeydown="if(event.key==='Enter')go()">
+    <button class="start-btn" id="startBtn" onclick="go()" disabled>Start Quiz &rarr;</button>
+    <div class="reg-stats">
+      <div class="reg-stat"><strong>25</strong>Questions</div>
+      <div class="reg-stat"><strong>20s</strong>Per question</div>
+      <div class="reg-stat"><strong>1000</strong>Max pts each</div>
+    </div>
+    <div class="type-legend">
+      <span class="type-badge tb-mcq">&#9654; Multiple Choice</span>
+      <span class="type-badge tb-tf">&#10003; True / False</span>
+      <span class="type-badge tb-dbg">&#128027; Debug the Code</span>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="quizScreen" class="screen">
+  <div class="quiz-top">
+    <div><div class="player-label">Playing as</div><div class="player-name" id="pNameDisplay">&mdash;</div></div>
+    <div class="prog-wrap"><div class="prog-label" id="progLabel">1 / 25</div><div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div></div>
+    <div class="score-box"><div class="score-label">Score</div><span class="score-val" id="scoreVal">0</span></div>
+  </div>
+  <div class="timer-row">
+    <div class="timer-circle" id="timerEl">20</div>
+    <div class="streak-msg" id="streakEl"></div>
+    <div style="width:52px"></div>
+  </div>
+  <div class="q-card">
+    <div class="q-top-row">
+      <div class="topic-badge" id="badgeEl">uKit Quiz</div>
+      <div class="q-type-badge" id="typeBadgeEl"></div>
+      <div class="q-num" id="qNumEl">Q1</div>
+    </div>
+    <div class="q-text" id="qTextEl">Loading&hellip;</div>
+    <div id="codeBlockWrap" style="display:none">
+      <div class="code-label">Debug this code</div>
+      <div class="code-block" id="codeBlockEl"></div>
+    </div>
+  </div>
+  <div class="answers-grid" id="ansGrid"></div>
+  <div class="feedback-box" id="fbEl"></div>
+  <div class="exp-box" id="expEl"></div>
+  <button class="next-btn" id="nextBtn" onclick="nextQ()">Next &rarr;</button>
+</div>
+
+<!-- SUBMITTING -->
+<div id="subScreen" class="screen">
+  <div class="sub-wrap">
+    <div class="spinner"></div>
+    <div class="sub-title">Submitting your results&hellip;</div>
+    <div class="sub-sub">Sending to your teacher &mdash; please wait</div>
+    <div class="sub-err" id="subErr"></div>
+  </div>
+</div>
+
+<!-- DONE -->
+<div id="doneScreen" class="screen">
+  <div class="done-card">
+    <div class="done-trophy">&#127881;</div>
+    <div class="done-name" id="doneName">Well done!</div>
+    <div class="done-sent"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Results sent to your teacher</div>
+    <div class="done-score" id="doneScore">0</div>
+    <div class="done-pts">total points</div>
+    <div class="done-correct" id="doneCorrect">0 of 25 correct</div>
+    <div class="done-grade" id="doneGrade"></div>
+    <div class="done-stats">
+      <div class="done-stat"><span class="done-stat-val" id="dsPct">0%</span><div class="done-stat-lbl">Accuracy</div></div>
+      <div class="done-stat"><span class="done-stat-val" id="dsStreak">0</span><div class="done-stat-lbl">Best streak</div></div>
+      <div class="done-stat"><span class="done-stat-val" id="dsTime">0s</span><div class="done-stat-lbl">Avg time</div></div>
+    </div>
+    <div class="done-breakdown">
+      <div class="done-bd-title">Score by question type</div>
+      <div class="done-bd-row"><span>Multiple Choice</span><span id="bdMCQ">—</span></div>
+      <div class="done-bd-row"><span>True / False</span><span id="bdTF">—</span></div>
+      <div class="done-bd-row"><span>Debug the Code</span><span id="bdDBG">—</span></div>
+    </div>
+    <div class="done-notice">Results submitted to your teacher&apos;s spreadsheet.<br>Nothing to download or edit. Great work completing the quiz!</div>
+  </div>
+</div>
+
+</div><!-- /container -->
+<script>
+const SHEET_URL="PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
+const QUIZ_TOPIC="uKit Quiz \u2014 UKIT Components";
+const ICONS=['\u25cf','\u25a0','\u25b2','\u25c6'],COLS=['a','b','c','d'];
+const ALL_Q=[{"type": "mcq", "q": "What does the uKit AI controller act like in relation to a human body?", "ans": ["The heart", "The brain", "The lungs", "The skeleton"], "c": 1, "exp": "The uKit AI controller acts like a human BRAIN — it can be programmed to process data and control other devices, just as the brain processes information and controls the body."}, {"type": "tf", "q": "The uKit AI controller has a built-in speaker (loudspeaker) inside it.", "ans": ["True", "False"], "c": 0, "exp": "TRUE. The uKit AI controller includes an internal speaker (loudspeaker) built directly into it, allowing it to play audio without a separate speaker module."}, {"type": "mcq", "q": "What should you remember about the uKit AI controller number for Bluetooth connection?", "ans": ["The first four digits", "The middle four digits", "The last four digits", "The entire number"], "c": 2, "exp": "You must remember the LAST FOUR DIGITS of the uKit AI controller number (e.g. 97BA or EFB6) — these identify your specific device when connecting via Bluetooth."}, {"type": "debug", "q": "A student tries to connect the uKit AI controller via Bluetooth but it fails. What did they forget?", "code": "Steps taken:\n1. Opened uCode\n2. Clicked 'Add hardware'\n3. Selected 'Bluetooth'\n4. Looked for device — not found!", "ans": ["They forgot to enable uCode Link first — uCode Link must be installed and running before Bluetooth connection works", "They need to use USB not Bluetooth", "The controller must be off during connection", "They need to restart the computer"], "c": 0, "exp": "The note states: 'You need to enable uCode Link first before connecting.' uCode Link must be downloaded and running before any Bluetooth connection to the uKit AI controller will work."}, {"type": "mcq", "q": "What is the main DISADVANTAGE of the infrared sensor in the uKit?", "ans": ["It cannot measure any distance", "It is easily affected by ambient light, limiting its detection range", "It is too large to fit in models", "It only works in darkness"], "c": 1, "exp": "The infrared sensor is easily affected by ambient (surrounding) light, which can limit its effective detection range. It also requires individuals to be very close for effective sensing."}, {"type": "tf", "q": "The infrared sensor works by emitting infrared light from a RECEIVING tube.", "ans": ["True", "False"], "c": 1, "exp": "FALSE. The infrared sensor EMITS light from the TRANSMITTING tube, not the receiving tube. The RECEIVING tube captures the reflected infrared light bounced back from obstacles."}, {"type": "mcq", "q": "Which sensor uses ULTRASOUND for distance detection?", "ans": ["Sound sensor", "Infrared sensor", "Touch sensor", "Ultrasonic sensor"], "c": 3, "exp": "The ULTRASONIC sensor uses ultrasound (high-frequency sound waves inaudible to humans) for distance detection — the same principle used by bats and dolphins for echolocation."}, {"type": "tf", "q": "Ultrasound is a type of sound wave that cannot be heard by human ears, but some animals like bats and dolphins can hear it.", "ans": ["True", "False"], "c": 0, "exp": "TRUE. Ultrasound is a special type of sound wave that is beyond the human hearing range. However, bats and dolphins use ultrasound naturally for navigation and hunting."}, {"type": "mcq", "q": "What does the SOUND SENSOR measure?", "ans": ["The temperature of sound", "The loudness (volume) of sound", "The colour of sound", "The speed of sound"], "c": 1, "exp": "The sound sensor measures the LOUDNESS of sound, with a microphone located on the front. It can be used in sound-activated lamps, intrusion detectors, and noise detectors."}, {"type": "mcq", "q": "The TOUCH sensor can detect which THREE types of touch signals?", "ans": ["Press, release, hold", "Tap, swipe, pinch", "Single click, double click, and long press", "Soft, medium, hard"], "c": 2, "exp": "The touch sensor detects three distinct signals: SINGLE CLICK, DOUBLE CLICK, and LONG PRESS — allowing three different actions from one sensor."}, {"type": "tf", "q": "The light sensor can detect changes in ambient light and determine if it is sunny or cloudy.", "ans": ["True", "False"], "c": 0, "exp": "TRUE. Light sensors detect changes in surrounding light levels to determine the adequacy of light or the presence of cloudy weather — used in smart laundry racks and automatic street lights."}, {"type": "mcq", "q": "What two functions are COMBINED in the temperature and humidity sensor?", "ans": ["Thermometer and barometer", "Thermometer and hygrometer", "Clock and thermometer", "Barometer and hygrometer"], "c": 1, "exp": "The temperature and humidity sensor combines a THERMOMETER (temperature measurement) and a HYGROMETER (humidity measurement) in one component — monitoring both environmental conditions."}, {"type": "debug", "q": "A student connected an infrared sensor to detect someone entering a bright sunny room but it keeps giving wrong readings. What is the problem?", "code": "Infrared sensor connected\nDetection threshold: 10 cm\nLocation: Bright window-facing room\nResult: Random incorrect detections", "ans": ["Infrared sensors are susceptible to interference from ambient light — strong sunlight causes false readings. Use an ultrasonic sensor in bright environments instead", "The threshold is too large", "The sensor is broken", "The cable is wrong"], "c": 0, "exp": "The infrared sensor is 'susceptible to interference from ambient light, which can limit its effective detection range.' Bright sunlight is a classic cause of false readings. The ultrasonic sensor is not affected by light and would be better here."}, {"type": "mcq", "q": "The servo is like which part of the human body?", "ans": ["The brain", "The heart", "The limbs", "The eyes"], "c": 2, "exp": "The servo is like human LIMBS — it receives commands and executes the corresponding movements, just as arms and legs receive signals from the brain and move accordingly."}, {"type": "tf", "q": "The servo's rotating angle range is -180° to 180°.", "ans": ["True", "False"], "c": 1, "exp": "FALSE. The servo's rotating angle range is -118° to 118°. Clockwise: 0° to 118°. Anticlockwise: -118° to 0°. When the △ icon aligns with the scale line, the angle is at 0°."}, {"type": "mcq", "q": "When the △ icon on the servo horn aligns with the scale line, what angle is the servo at?", "ans": ["90°", "-118°", "0°", "118°"], "c": 2, "exp": "When the △ (triangle) icon on the servo horn aligns with the scale line, the servo angle is at ZERO degrees (0°) — this is the servo's neutral/home position."}, {"type": "mcq", "q": "In WHEEL MODE, how does the servo rotate?", "ans": ["To a specific fixed angle only", "Continuously like a wheel (360° rotation)", "Only clockwise", "Only 45 degrees at a time"], "c": 1, "exp": "In Wheel Mode, the servo rotates CONTINUOUSLY like a wheel (full 360° rotation). The 'Rotate servo ID-, 360°, Clockwise/Anticlockwise, Speed' block controls this mode."}, {"type": "mcq", "q": "How many small cells does the LED Module consist of?", "ans": ["4 cells", "6 cells", "8 cells", "12 cells"], "c": 2, "exp": "The LED Module consists of 8 small cells, with each cell containing 1 RGB LED — giving a total of 8 individually controllable RGB LEDs."}, {"type": "tf", "q": "ASR stands for Automatic Speech Recognition and converts human speech into text.", "ans": ["True", "False"], "c": 0, "exp": "TRUE. ASR = Automatic Speech Recognition. It is the technology that converts human spoken words into text, which computers can then process and understand."}, {"type": "mcq", "q": "What does TTS stand for and what does it do?", "ans": ["Touch-to-Screen — controls touchscreen devices", "Text-to-Speech — automatically converts text into human-sounding audio", "Tone-to-Sound — plays musical tones", "Transfer-to-Storage — saves data to memory"], "c": 1, "exp": "TTS = Text-to-Speech. It automatically converts input TEXT into human-sounding SPEECH. TTS is a key component in realising human-machine speech interaction — enabling machines to communicate with humans using voice."}, {"type": "mcq", "q": "In the uCode interface, where do you drag code blocks FROM to build your program?", "ans": ["The editing area", "The stage/hardware area", "The menu bar", "The code category area and code block area"], "c": 3, "exp": "In the uCode interface: the CODE CATEGORY AREA shows categories of blocks (Events, Control, Motion etc.), the CODE BLOCK AREA shows the actual blocks in each category. You drag from there into the EDITING AREA to build your program."}, {"type": "tf", "q": "uCode allows you to program hardware by dragging and dropping code blocks — no typing required.", "ans": ["True", "False"], "c": 0, "exp": "TRUE. uCode is a block-based programming software — you program by DRAGGING code blocks and arranging them according to your logic. It can be used for games, animations, and controlling hardware like the uKit AI controller."}, {"type": "debug", "q": "A student programmed a TTS speech block but when they click Run, nothing happens. What is the most likely missing block?", "code": "Main controller plays speech 'Welcome!' till the end", "ans": ["They forgot to add the 'When the green flag button clicked' event block at the start of the program", "The speech text is wrong", "The controller is not charged", "They need a sound sensor"], "c": 0, "exp": "The note in the presentation states: 'Before clicking the green flag button to run the program, you must add the code block When the green flag button clicked to the program.' Without this event block, the program has no trigger and will not run."}, {"type": "mcq", "q": "What is the face recognition process order for the Vision Sensor?", "ans": ["Output → Compare → Extract → Capture", "Capture an image → Extract features → Compare features → Output the result", "Compare → Capture → Output → Extract", "Extract → Capture → Output → Compare"], "c": 1, "exp": "The Vision Sensor face recognition process: 1) CAPTURE an image, 2) EXTRACT features (facial landmarks), 3) COMPARE features against the face database, 4) OUTPUT the result (who was recognised)."}, {"type": "mcq", "q": "The light sensor is used in smart laundry racks because it can detect:", "ans": ["The weight of clothes", "Whether it is raining at that moment", "Changes in ambient light to determine if it is sunny or cloudy", "The temperature outside"], "c": 2, "exp": "Light sensors detect changes in surrounding light to determine if it is sunny (enough light) or cloudy. A smart laundry rack uses this to automatically retract when it becomes cloudy — protecting clothes from rain."}];
+
+let pName='',pClass='',questions=[],cur=0,score=0;
+let streak=0,bestStreak=0,answered=false;
+let timer=20,timerInt=null;
+let results=[],timeTaken=[],qStart=0;
+let typeTally={mcq:{c:0,t:0},tf:{c:0,t:0},debug:{c:0,t:0}};
+
+function $(i){return document.getElementById(i)}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active')}
+function shuffle(a){return[...a].sort(()=>Math.random()-.5)}
+
+function chk(){
+  const n=$('nameIn').value.trim(),c=$('classIn').value.trim();
+  $('startBtn').disabled=n.length<2||c.length<1;
+}
+function go(){
+  pName=$('nameIn').value.trim();pClass=$('classIn').value.trim();
+  if(pName.length<2||pClass.length<1)return;
+  $('pNameDisplay').textContent=pName;
+  questions=shuffle(ALL_Q);cur=0;score=0;streak=0;bestStreak=0;
+  results=[];timeTaken=[];typeTally={mcq:{c:0,t:0},tf:{c:0,t:0},debug:{c:0,t:0}};
+  show('quizScreen');renderQ();
+}
+
+function renderQ(){
+  answered=false;
+  const q=questions[cur];
+  $('progFill').style.width=Math.round(cur/questions.length*100)+'%';
+  $('progLabel').textContent=(cur+1)+' / '+questions.length;
+  $('qNumEl').textContent='Q'+(cur+1)+' of '+questions.length;
+  $('qTextEl').textContent=q.q;
+  $('fbEl').className='feedback-box';$('expEl').textContent='';
+  $('nextBtn').style.display='none';
+  $('streakEl').textContent=streak>=2?streak+' in a row! \uD83D\uDD25':'';
+
+  // Type badge
+  const tb=$('typeBadgeEl');
+  if(q.type==='mcq'){tb.textContent='\u25B6 Multiple Choice';tb.className='q-type-badge qtb-mcq';}
+  else if(q.type==='tf'){tb.textContent='\u2713 True / False';tb.className='q-type-badge qtb-tf';}
+  else{tb.textContent='\uD83D\uDC1B Debug the Code';tb.className='q-type-badge qtb-debug';}
+
+  // Code block for debug questions
+  const cw=$('codeBlockWrap');
+  if(q.type==='debug' && q.code){
+    $('codeBlockEl').textContent=q.code;
+    cw.style.display='block';
+  }else{cw.style.display='none';}
+
+  // Build answer buttons
+  const grid=$('ansGrid');grid.innerHTML='';
+  if(q.type==='tf'){
+    grid.className='answers-grid tf-grid';
+    const pairs=[[0,'tf-true','\u2714  True'],[1,'tf-false','\u2718  False']];
+    pairs.forEach(([orig,cls,label])=>{
+      const btn=document.createElement('button');
+      btn.className='ans-btn '+cls;
+      btn.innerHTML=label;
+      btn.dataset.orig=orig;
+      btn.onclick=()=>pick(btn,orig===q.c,q);
+      grid.appendChild(btn);
+    });
+  }else{
+    grid.className='answers-grid';
+    const idxs=shuffle([0,1,2,3]);
+    idxs.forEach((orig,pos)=>{
+      const btn=document.createElement('button');
+      btn.className='ans-btn '+COLS[pos];
+      btn.innerHTML='<span class="ans-icon">'+ICONS[pos]+'</span>'+q.ans[orig];
+      btn.dataset.orig=orig;
+      btn.onclick=()=>pick(btn,orig===q.c,q);
+      grid.appendChild(btn);
+    });
+  }
+  qStart=Date.now();startTimer();
+}
+
+function startTimer(){
+  clearInterval(timerInt);timer=20;updTimer();
+  timerInt=setInterval(()=>{timer--;updTimer();if(timer<=0){clearInterval(timerInt);timeUp();}},1000);
+}
+function updTimer(){
+  $('timerEl').textContent=timer;
+  $('timerEl').className='timer-circle'+(timer<=5?' urgent':'');
+}
+function timeUp(){
+  if(answered)return;answered=true;streak=0;
+  revealAll(null);
+  $('fbEl').textContent="Time's up!";$('fbEl').className='feedback-box no';
+  $('expEl').textContent=questions[cur].exp;$('nextBtn').style.display='block';
+  const q=questions[cur];const tk=q.type==='debug'?'debug':q.type;
+  typeTally[tk].t++;
+  results.push({type:q.type,ok:false,pts:0,t:20});
+}
+function pick(btn,isOk,q){
+  if(answered)return;answered=true;clearInterval(timerInt);
+  const el=Math.round((Date.now()-qStart)/1000);timeTaken.push(el);
+  const pts=isOk?Math.max(500,timer*50):0;
+  if(isOk){score+=pts;streak++;bestStreak=Math.max(bestStreak,streak);}else streak=0;
+  $('scoreVal').textContent=score.toLocaleString();
+  const tk=q.type==='debug'?'debug':q.type;
+  typeTally[tk].t++;if(isOk)typeTally[tk].c++;
+  revealAll(btn);
+  $('fbEl').textContent=isOk?(streak>=3?'Correct! +'+pts.toLocaleString()+' \u2014 '+streak+' streak! \uD83D\uDD25':'Correct! +'+pts.toLocaleString()+' pts'):'Not quite!';
+  $('fbEl').className='feedback-box '+(isOk?'ok':'no');
+  $('expEl').textContent=q.exp;
+  $('streakEl').textContent=streak>=2?streak+' in a row! \uD83D\uDD25':'';
+  $('nextBtn').style.display='block';
+  results.push({type:q.type,ok:isOk,pts:pts,t:el});
+}
+function revealAll(sel){
+  const q=questions[cur];
+  if(q.type==='tf'){
+    document.querySelectorAll('.ans-btn').forEach(b=>{
+      b.style.pointerEvents='none';
+      const orig=parseInt(b.dataset.orig);
+      if(orig===q.c){b.style.outline='4px solid #fff';}
+      else if(b===sel||sel===null){b.style.opacity='.25';}
+      else{b.style.opacity='.25';}
+    });
+  }else{
+    document.querySelectorAll('.ans-btn').forEach(b=>{
+      b.classList.add('locked');
+      b.classList.add(parseInt(b.dataset.orig)===q.c?'correct':'wrong');
+    });
+  }
+}
+function nextQ(){cur++;if(cur>=questions.length)submitResults();else renderQ();}
+
+async function submitResults(){
+  show('subScreen');
+  const correct=results.filter(r=>r.ok).length;
+  const pct=Math.round(correct/questions.length*100);
+  const avgTime=timeTaken.length?Math.round(timeTaken.reduce((a,b)=>a+b,0)/timeTaken.length):0;
+  const grade=pct>=90?'Excellent':pct>=70?'Great':pct>=50?'Good':'Needs Practice';
+  const now=new Date();
+  const qLog=results.map((r,i)=>'Q'+(i+1)+'['+r.type+']['+(r.ok?'Y':'N')+']'+r.pts+'pts').join('|');
+  const bdStr=
+    'MCQ:'+typeTally.mcq.c+'/'+typeTally.mcq.t+' '+
+    'TF:'+typeTally.tf.c+'/'+typeTally.tf.t+' '+
+    'Debug:'+typeTally.debug.c+'/'+typeTally.debug.t;
+  const payload={
+    studentName:pName,className:pClass,quizTopic:QUIZ_TOPIC,
+    date:now.toLocaleDateString('en-GB'),
+    time:now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
+    totalScore:score,correct:correct,totalQuestions:questions.length,
+    accuracy:pct,grade:grade,bestStreak:bestStreak,avgTimeSec:avgTime,
+    topicBreakdown:bdStr,questionLog:qLog,
+  };
+  try{
+    await fetch(SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  }catch(err){
+    $('subErr').innerHTML='Could not submit. Please tell your teacher.<br><small>'+err.message+'</small>';
+    $('subErr').style.display='block';
+  }
+  showDone(correct,pct,avgTime,grade);
+}
+function showDone(correct,pct,avgTime,grade){
+  show('doneScreen');
+  $('doneName').textContent='Well done, '+pName+'!';
+  $('doneScore').textContent=score.toLocaleString();
+  $('doneCorrect').textContent=correct+' of '+questions.length+' correct';
+  $('dsPct').textContent=pct+'%';$('dsStreak').textContent=bestStreak;$('dsTime').textContent=avgTime+'s';
+  const m={Excellent:['#1a3d1a','#46d39a','Excellent \u2014 Master Coder! \uD83C\uDFC6'],
+             Great:['#1a2e3d','#5bc0eb','Great work! Keep it up! \uD83D\uDC4F'],
+             Good:['#3d3d1a','#d89e00','Good effort \u2014 review and retry! \uD83D\uDCDA'],
+             'Needs Practice':['#3d1a1a','#ff6b6b','Keep practising \u2014 you\u2019ve got this! \uD83D\uDCAA']};
+  const[bg,col,lbl]=m[grade]||m['Needs Practice'];
+  const g=$('doneGrade');g.style.cssText='background:'+bg+';color:'+col+';padding:9px 20px;border-radius:10px';g.textContent=lbl;
+  $('bdMCQ').textContent=typeTally.mcq.c+'/'+typeTally.mcq.t;
+  $('bdTF').textContent=typeTally.tf.c+'/'+typeTally.tf.t;
+  $('bdDBG').textContent=typeTally.debug.c+'/'+typeTally.debug.t;
+}
+</script>
+</body>
+</html>
